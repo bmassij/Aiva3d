@@ -6,11 +6,12 @@
 |--------|-----------|------|
 | Configuration | `config.py` | Paths, units (mm), export directories |
 | Primitives & utilities | `cad/` | Reusable ops, validation, provenance metadata |
+| CAD AI UI | `ui/` | Streamlit app, Plotly preview, reference uploads, session state |
 | Templates | `templates/` | Starter parametric models (not customer finals) |
-| Projects | `projects/work/`, `projects/examples/` | Your active designs and verified examples |
+| Projects | `projects/work/`, `projects/examples/` | Active designs and verified examples |
 | Export | `exporters/pipeline.py` | STEP, STL, 3MF, OBJ with safe naming |
 | Preview | `preview/viewer.py` | Matplotlib mesh snapshot; optional VTK `show` |
-| Future AI | `cad/ai_interface.py` | Typed request/result hooks for NL → parameters |
+| AI hooks | `cad/ai_interface.py`, `ui/nl_adjust.py` | Typed and heuristic NL → parameters |
 
 ## Data flow
 
@@ -18,7 +19,7 @@
 parameters (+ provenance metadata)
     → build() → cq.Workplane
     → assert_valid_solid()
-    → preview (optional)
+    → ui/ Plotly preview (optional)
     → export_* → exports/<format>/
 ```
 

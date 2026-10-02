@@ -10,7 +10,7 @@
 4. Run:
 
 ```powershell
-cd D:\AI\3d
+cd D:\AI\Aiva3D
 .\.venv\Scripts\Activate.ps1
 python projects\work\<your_project>\<module>.py
 ```
@@ -29,3 +29,7 @@ export_all(build(), "my_part", formats=("step", "stl"))
 ```
 
 Files land in `exports/step/`, `exports/stl/`, etc. Existing names are never overwritten silently; a numeric suffix is added.
+
+## Aiva3D UI
+
+Register the project in `ui/app.py` `PROJECTS` and wire build/validation when ready for interactive iteration.

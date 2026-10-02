@@ -1,74 +1,63 @@
-# AI-assisted parametric CAD environment
+# Aiva3D
 
-Personal, reusable **Python + CadQuery + OpenCascade** workspace for mechanical parts, enclosures, brackets, fixtures, and 3D-printable prototypes. Default units are **millimeters**.
+**Aiva3D** is an AI-assisted parametric CAD platform built on **Python**, **CadQuery**, and **OpenCascade**. Design mechanical parts in millimeters, validate solids, preview in 3D, and export STEP/STL/3MF for printing or CAM.
 
-**Location:** `D:\AI\3d`
+**Recommended location:** `D:\AI\Aiva3D`
 
 ## Quick start
 
 ```powershell
-cd D:\AI\3d
+cd D:\AI\Aiva3D
 .\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
 python -m pytest
-python projects\examples\test_mounting_plate.py
+python scripts\run_handle_test_pipeline.py
 ```
+
+## Streamlit CAD UI
+
+Interactive reverse-engineering workflow: reference photo upload, natural-language parameter tweaks, Plotly 3D preview, dual-model comparison, and export.
+
+```powershell
+python scripts\start_cad_ui.py
+```
+
+Open [http://localhost:8501](http://localhost:8501) and select **handle_test** for the dual-material grip project.
 
 ## Environment
 
 | Component | Notes |
 |-----------|--------|
-| Python | **3.10.11** in `.venv` (recommended for CadQuery; system default may be 3.13) |
-| CadQuery | **2.7.0** with `cadquery-ocp` / OpenCascade |
-| Git | Repository initialized locally (no remote by default) |
-
-Create or refresh the venv:
+| Python | **3.10.x** in `.venv` (recommended for CadQuery) |
+| CadQuery | **2.7.x** with `cadquery-ocp` |
+| UI | Streamlit + Plotly |
 
 ```powershell
 py -3.10 -m venv .venv
 .\.venv\Scripts\pip install -r requirements.txt
 ```
 
-## Folder structure
+## Repository layout
 
 ```
-cad/           Reusable geometry, validation, AI hooks
-templates/     Parametric starters (bracket, enclosure, …)
-projects/      examples/ (verified) and work/ (your designs)
+cad/           Geometry utilities, validation, AI hooks
+ui/            Streamlit CAD AI (app, mesh viewer, reference images)
+templates/     Parametric starters
+projects/      examples/ and work/ (e.g. handle_test)
 exporters/     STEP, STL, 3MF, OBJ pipeline
-preview/       Matplotlib-based mesh previews
+preview/       Matplotlib mesh previews
 exports/       Generated files (gitignored except .gitkeep)
 tests/         pytest suite
-scripts/       run_example, preview_model
-reference/     Measurement / reverse-engineering notes
+scripts/       UI launcher, pipelines, examples
 docs/          Architecture and workflows
+reference/     Measurements and uploaded reference photos
 ```
 
 ## Create a model
 
 1. See [docs/NEW_PROJECT.md](docs/NEW_PROJECT.md).
-2. Implement `build()` returning a `cq.Workplane`.
+2. Implement `build()` returning a `cq.Workplane` (or documented tuple for multi-body parts).
 3. Tag dimensions with `DataProvenance` (`measured` / `assumed` / `calculated`).
-
-## Run examples
-
-```powershell
-python scripts\run_example.py test_mounting_plate
-```
-
-## Preview
-
-Saves a PNG under `preview/output/` (and optionally opens an interactive window):
-
-```powershell
-python scripts\preview_model.py --module projects.examples.test_mounting_plate --no-show
-```
-
-For interactive VTK viewing (local display):
-
-```python
-from preview.viewer import preview_vtk_show
-preview_vtk_show(build())
-```
 
 ## Export
 
@@ -77,32 +66,20 @@ from exporters.pipeline import export_all
 export_all(model, "part_name", formats=("step", "stl", "3mf", "obj"))
 ```
 
-Or use the example script, which exports all supported formats.
-
 ## Tests
 
 ```powershell
 python -m pytest
 ```
 
-## Git
+## GitHub
 
-- `.venv/` and generated exports are ignored.
-- Initial commit: `Initial CAD AI environment` (local only).
+Remote: [https://github.com/bmassij/Aiva3d](https://github.com/bmassij/Aiva3d)
 
-## Troubleshooting
+## License
 
-| Issue | Action |
-|--------|--------|
-| `import cadquery` fails | Activate `.venv`; use Python 3.10–3.12 |
-| Invalid solid after boolean | Check overlaps, fillet radius, sketch closure |
-| 3MF/OBJ fails | Ensure `networkx` and `lxml` are installed (`requirements.txt`) |
-| VTK `show()` errors | Use matplotlib preview; prefer Python 3.10 in this project |
+MIT — see [LICENSE](LICENSE).
 
-## Future AI integration
+## Cursor / agents
 
-`cad/ai_interface.py` defines `CADBuildRequest` / template registry for a later natural-language → parameters → `build()` → validate → export pipeline. No LLM is bundled in this repo.
-
-## Cursor / AI agents
-
-Project rules for agents live in `.cursor/rules/cad-environment.mdc`.
+Project rules: `.cursor/rules/cad-environment.mdc` and [AGENTS.md](AGENTS.md).

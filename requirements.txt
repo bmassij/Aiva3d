@@ -6,6 +6,10 @@ trimesh==5.1.1
 networkx==3.4.2
 lxml==6.1.3
 
+# Aiva3D UI
+streamlit==1.65.0
+plotly==6.0.1
+
 # Preview and tests
 matplotlib==3.10.9
 pytest==9.1.1

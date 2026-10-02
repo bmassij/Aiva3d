@@ -1,10 +1,10 @@
 ---
-description: Parametric CAD environment conventions (CadQuery, mm, exports)
+description: Aiva3D parametric CAD conventions (CadQuery, mm, exports, UI)
 globs: "**/*.{py,md}"
 alwaysApply: true
 ---
 
-# CAD AI environment rules
+# Aiva3D CAD rules
 
 - Use **CadQuery** and OpenCascade for all solid modeling in this repository.
 - Default linear unit is **millimeters** unless the user specifies otherwise.
@@ -15,8 +15,8 @@ alwaysApply: true
 - **Validate** with `assert_valid_solid()` before export.
 - Use `exporters/pipeline.py` for STEP/STL/3MF/OBJ; never silently overwrite exports (`PREVENT_EXPORT_OVERWRITE`).
 - Place new designs under `projects/work/`; keep `templates/` as generic starters only.
+- Interactive work goes in **`ui/`** (Streamlit); launch via `scripts/start_cad_ui.py`.
 - Run **`python -m pytest`** after substantive CAD changes.
 - Avoid unnecessary dependencies beyond `requirements.txt`.
-- Do not change the single-database / multi-store patterns from other unrelated projects—this repo is standalone CAD.
 - Document assumptions in `ParametricModelMeta` or module docstrings.
-- For future NL→CAD work, extend `cad/ai_interface.py` rather than ad-hoc string parsing in geometry code.
+- For NL→CAD work, extend `cad/ai_interface.py` or `ui/nl_adjust.py` rather than ad-hoc string parsing in geometry code.

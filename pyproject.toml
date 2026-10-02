@@ -3,17 +3,20 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cad-ai-environment"
+name = "aiva3d"
 version = "0.1.0"
-description = "Personal AI-assisted parametric CAD environment (CadQuery / OpenCascade)"
+description = "Aiva3D — AI-assisted parametric CAD platform (CadQuery / OpenCascade)"
 readme = "README.md"
 requires-python = ">=3.10,<3.14"
+license = { text = "MIT" }
 dependencies = [
     "cadquery>=2.6.0,<3",
     "trimesh>=5",
     "networkx>=3",
     "lxml>=5",
     "matplotlib>=3.8",
+    "streamlit>=1.40",
+    "plotly>=5",
     "pytest>=8",
 ]
 
@@ -22,4 +25,4 @@ testpaths = ["tests"]
 pythonpath = ["."]
 
 [tool.setuptools.packages.find]
-include = ["cad*", "exporters*", "preview*"]
+include = ["cad*", "exporters*", "preview*", "ui*"]
