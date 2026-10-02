@@ -1,0 +1,11 @@
+# Core CAD stack (pulls cadquery-ocp, VTK, trame, etc. via pip)
+cadquery==2.7.0
+
+# Export helpers (mesh formats via tessellation)
+trimesh==5.1.1
+networkx==3.4.2
+lxml==6.1.3
+
+# Preview and tests
+matplotlib==3.10.9
+pytest==9.1.1

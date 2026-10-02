@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cad-ai-environment"
+version = "0.1.0"
+description = "Personal AI-assisted parametric CAD environment (CadQuery / OpenCascade)"
+readme = "README.md"
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "cadquery>=2.6.0,<3",
+    "trimesh>=5",
+    "networkx>=3",
+    "lxml>=5",
+    "matplotlib>=3.8",
+    "pytest>=8",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.setuptools.packages.find]
+include = ["cad*", "exporters*", "preview*"]

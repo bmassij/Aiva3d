@@ -1,0 +1,40 @@
+# Virtual environment
+.venv/
+venv/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Exports and previews (regenerated locally)
+exports/step/*
+exports/stl/*
+exports/3mf/*
+exports/obj/*
+!exports/step/.gitkeep
+!exports/stl/.gitkeep
+!exports/3mf/.gitkeep
+!exports/obj/.gitkeep
+
+preview/output/*
+!preview/output/.gitkeep
+
+# IDE
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Secrets
+.env
+.env.*
+*.pem
+credentials.json

@@ -1,0 +1,22 @@
+---
+description: Parametric CAD environment conventions (CadQuery, mm, exports)
+globs: "**/*.{py,md}"
+alwaysApply: true
+---
+
+# CAD AI environment rules
+
+- Use **CadQuery** and OpenCascade for all solid modeling in this repository.
+- Default linear unit is **millimeters** unless the user specifies otherwise.
+- Prefer **parametric** models: named constants at the top, `build()` returns `cq.Workplane`.
+- Do **not invent dimensions**; label each value with `DataProvenance` (measured / assumed / calculated).
+- Separate **measured** data from **assumptions** in metadata and documentation.
+- Keep geometry **modular**: reuse `cad/primitives` and `cad/utilities`; avoid monolithic scripts.
+- **Validate** with `assert_valid_solid()` before export.
+- Use `exporters/pipeline.py` for STEP/STL/3MF/OBJ; never silently overwrite exports (`PREVENT_EXPORT_OVERWRITE`).
+- Place new designs under `projects/work/`; keep `templates/` as generic starters only.
+- Run **`python -m pytest`** after substantive CAD changes.
+- Avoid unnecessary dependencies beyond `requirements.txt`.
+- Do not change the single-database / multi-store patterns from other unrelated projects—this repo is standalone CAD.
+- Document assumptions in `ParametricModelMeta` or module docstrings.
+- For future NL→CAD work, extend `cad/ai_interface.py` rather than ad-hoc string parsing in geometry code.
