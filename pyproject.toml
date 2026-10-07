@@ -23,6 +23,7 @@ dependencies = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+markers = ["integration: tests that need local export fixtures"]
 
 [tool.setuptools.packages.find]
-include = ["aiva3d*", "cad*", "exporters*", "preview*", "ui*", "projects*"]
+include = ["aiva3d*", "cad*", "exporters*", "preview*", "ui*", "projects*", "print_core*", "quote_api*"]

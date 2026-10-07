@@ -1,0 +1,29 @@
+{
+  "_comment": "DEVELOPMENT DEFAULT — replace with Crooijmans production filament prices before go-live.",
+  "profiles": [
+    {
+      "id": "pla_dev",
+      "name": "PLA (development default)",
+      "density_g_cm3": 1.24,
+      "price_per_kg": 22.0
+    },
+    {
+      "id": "tpu_dev",
+      "name": "TPU (development default)",
+      "density_g_cm3": 1.21,
+      "price_per_kg": 38.0
+    },
+    {
+      "id": "petg_dev",
+      "name": "PETG (development default)",
+      "density_g_cm3": 1.27,
+      "price_per_kg": 26.0
+    },
+    {
+      "id": "varishore_dev",
+      "name": "VariShore-like foam (development default)",
+      "density_g_cm3": 0.95,
+      "price_per_kg": 45.0
+    }
+  ]
+}

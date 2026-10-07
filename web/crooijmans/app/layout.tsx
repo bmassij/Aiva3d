@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Aiva3D — Klant · PNG naar 3MF",
-  description: "Upload logo/afbeelding, kleuren, genereer printable 3MF via CAD-backend",
+  title: "Crooijmans — 3D print offerte",
+  description: "Upload 3MF, bereken gewicht, materiaal, tijd en offerte (Pilot 3)",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

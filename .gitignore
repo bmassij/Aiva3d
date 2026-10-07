@@ -38,6 +38,8 @@ exports/verification/
 node_modules/
 web/customer/.next/
 web/customer/out/
+web/crooijmans/.next/
+web/crooijmans/out/
 .vercel
 
 # IDE

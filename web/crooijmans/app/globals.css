@@ -1,10 +1,10 @@
 :root {
-  --bg: #0f1419;
-  --card: #1a2332;
-  --text: #e8eef5;
-  --muted: #8b9cb3;
-  --accent: #4a90d9;
-  --soft: #7ed957;
+  --bg: #12110f;
+  --card: #1f1c18;
+  --text: #f2ebe3;
+  --muted: #a89b8c;
+  --accent: #c05621;
+  --ok: #38a169;
 }
 
 * {
@@ -15,7 +15,7 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  background: radial-gradient(ellipse at top, #1a2a3d 0%, var(--bg) 55%);
+  background: radial-gradient(ellipse at top, #2a2218 0%, var(--bg) 55%);
   color: var(--text);
 }
 
@@ -39,7 +39,7 @@ p.lead {
 
 .card {
   background: var(--card);
-  border: 1px solid #2a3a4f;
+  border: 1px solid #3d3428;
   border-radius: 12px;
   padding: 1.25rem;
   margin-bottom: 1rem;
@@ -52,35 +52,9 @@ label {
   margin-bottom: 0.35rem;
 }
 
-input[type="file"],
-input[type="color"] {
-  margin-bottom: 1rem;
-}
-
-.preview {
+input[type="file"] {
+  margin-bottom: 0.75rem;
   width: 100%;
-  max-width: 320px;
-  aspect-ratio: 1;
-  border-radius: 12px;
-  background: #0a0e14;
-  border: 1px dashed #3d4f66;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  margin-top: 0.5rem;
-}
-
-.preview img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
-
-.row {
-  display: flex;
-  gap: 1.5rem;
-  flex-wrap: wrap;
 }
 
 button.primary {
@@ -99,30 +73,38 @@ button.primary:disabled {
   cursor: not-allowed;
 }
 
-button.secondary {
-  background: transparent;
-  color: var(--accent);
-  border: 1px solid var(--accent);
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
 .status {
   font-size: 0.9rem;
   margin-top: 1rem;
   padding: 0.75rem;
   border-radius: 8px;
-  background: #0d1218;
+  background: #0d0b09;
 }
 
 .status.ok {
-  border-left: 3px solid var(--soft);
+  border-left: 3px solid var(--ok);
 }
 
 .status.warn {
   border-left: 3px solid #e6a23c;
+}
+
+.quote-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.quote-table th,
+.quote-table td {
+  text-align: left;
+  padding: 0.5rem 0.25rem;
+  border-bottom: 1px solid #3d3428;
+}
+
+.quote-table th {
+  color: var(--muted);
+  font-weight: 500;
 }
 
 footer {

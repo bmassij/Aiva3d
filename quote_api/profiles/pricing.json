@@ -1,0 +1,23 @@
+{
+  "_comment": "DEVELOPMENT DEFAULT — labor, post, packaging, margin; set with Crooijmans before production.",
+  "profiles": [
+    {
+      "id": "standard_dev",
+      "name": "Standard (development default)",
+      "labor_cost_per_hour": 35.0,
+      "labor_minutes_per_job": 15.0,
+      "post_processing_cost_fixed": 2.5,
+      "packaging_cost_fixed": 1.5,
+      "margin_percent": 25.0
+    },
+    {
+      "id": "rush_dev",
+      "name": "Rush (development default)",
+      "labor_cost_per_hour": 35.0,
+      "labor_minutes_per_job": 20.0,
+      "post_processing_cost_fixed": 5.0,
+      "packaging_cost_fixed": 2.0,
+      "margin_percent": 35.0
+    }
+  ]
+}

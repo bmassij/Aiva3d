@@ -1,0 +1,23 @@
+{
+  "_comment": "DEVELOPMENT DEFAULT — replace with Crooijmans machine cost rates before go-live.",
+  "profiles": [
+    {
+      "id": "bambu_p1s_dev",
+      "name": "Bambu P1S (development default)",
+      "machine_cost_per_hour": 4.5,
+      "default_print_speed_mm_s": 120.0,
+      "default_layer_height_mm": 0.2,
+      "default_infill": 0.15,
+      "notes": "Estimate only; not slicer-exact."
+    },
+    {
+      "id": "generic_fdm_dev",
+      "name": "Generic FDM (development default)",
+      "machine_cost_per_hour": 3.0,
+      "default_print_speed_mm_s": 60.0,
+      "default_layer_height_mm": 0.2,
+      "default_infill": 0.2,
+      "notes": "Conservative estimate profile."
+    }
+  ]
+}

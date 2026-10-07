@@ -39,15 +39,28 @@ export default function Home() {
 
   return (
     <main>
-      <h1>Aiva3D</h1>
+      <h1>Aiva3D · Klantportaal</h1>
       <p className="lead">
-        Upload je logo, kies kleuren voor hard/soft shell — preview hier; printable 3MF via de CAD-backend
-        (CadQuery draait niet op Vercel).
+        <strong>PNG → 3MF</strong> (roadmap): upload logo/afbeelding, kies kleuren — preview hier; echte geometrie en
+        3MF-export via de Python CAD-backend (CadQuery draait niet op Vercel).
       </p>
+
+      <div className="card status warn" style={{ marginBottom: "1rem" }}>
+        <strong>Review-build voor klant</strong> — laat weten wat je van de flow, teksten en preview vindt. 3MF-export
+        volgt zodra de CAD-API online staat.
+      </div>
 
       <div className="card">
         <label htmlFor="logo">Logo (PNG/SVG/JPG)</label>
         <input id="logo" type="file" accept="image/*" onChange={onLogo} />
+        <button
+          type="button"
+          className="secondary"
+          onClick={() => setLogoUrl("/demo-logo.jpg")}
+          style={{ marginBottom: "0.75rem" }}
+        >
+          Demo logo laden
+        </button>
         <div className="preview" style={{ borderColor: softColor }}>
           {logoUrl ? (
             <img src={logoUrl} alt="Logo preview" />
