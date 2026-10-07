@@ -42,11 +42,19 @@ Zonder dit faalt elke push op `main` (repo-root werd als Python gezien).
 
 Vercel → **Settings → General → Root Directory** → Save → **Redeploy**.
 
-CLI-deploy vanuit de submap (`cd web/customer` → `vercel --prod`) werkt ook als de root directory nog verkeerd staat; **GitHub-integratie** niet.
+**CLI na root directory:** deploy vanaf **repo-root** (`D:\AI\3d`), niet vanuit `web/customer`:
+
+```powershell
+cd D:\AI\3d
+npx vercel link --project aiva3d   # of crooijmans
+npx vercel deploy --prod
+```
+
+GitHub-push op `main` bouwt automatisch zodra root directory goed staat.
 
 ### Deployment Protection
 
-Als reviewers een Vercel-login zien: **Settings → Deployment Protection** uitzetten voor Production, of een share-link / bypass gebruiken.
+**SSO Deployment Protection** is uit op `aiva3d` en `crooijmans` (publiek op `*.vercel.app`). Opnieuw aanzetten: `npx vercel project protection enable <project> --sso`.
 
 ## Review-linkjes (klant / Crooijmans) — gratis op Vercel Hobby
 
