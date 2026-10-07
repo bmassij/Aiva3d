@@ -28,7 +28,7 @@ class FreeCADBridgeClient:
         try:
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
-        except urllib.error.URLError as exc:
+        except (urllib.error.URLError, TimeoutError) as exc:
             return BridgeResponse(
                 success=False,
                 command=command,

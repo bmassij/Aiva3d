@@ -73,7 +73,7 @@ def test_freecad_cmd_sync_if_available(tmp_path):
         return
     params = default_parameters()
     conn = FreeCADConnection()
-    conn.connect()
+    conn.connect(prefer_cmd=True)
     fcstd = tmp_path / "test_handle.FCStd"
     resp = conn.sync_model(params, fcstd, work_dir=tmp_path / "steps")
     assert resp.success, resp.error or resp.message

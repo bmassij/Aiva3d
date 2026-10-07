@@ -97,7 +97,7 @@ def test_freecad_sync_if_available(tmp_path):
     from aiva3d.freecad.bridge import FreeCADConnection
 
     conn = FreeCADConnection()
-    conn.connect()
+    conn.connect(prefer_cmd=True)
     fcstd = tmp_path / "handle.FCStd"
     resp = conn.sync_model(params, fcstd, work_dir=tmp_path / "fc2")
     assert resp.success, resp.error or resp.message

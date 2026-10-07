@@ -22,7 +22,16 @@ class FreeCADConnection:
     last_message: str = ""
     client: Optional[FreeCADBridgeClient] = field(default=None, repr=False)
 
-    def connect(self) -> BridgeResponse:
+    def connect(self, prefer_cmd: bool = False) -> BridgeResponse:
+        if prefer_cmd and detect_freecad_cmd() is not None:
+            self.mode = "cmd"
+            self.last_message = "FreeCADCmd (batch mode)"
+            return BridgeResponse(
+                success=True,
+                command="CONNECT",
+                message=self.last_message,
+                extra={"freecad_cmd": True, "http_bridge": False},
+            )
         self.client = FreeCADBridgeClient(self.host, self.port)
         ping = self.client.ping()
         if ping.success:
