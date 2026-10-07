@@ -27,6 +27,13 @@ exports/obj/*
 preview/output/*
 !preview/output/.gitkeep
 
+# Project-local regenerated CAD outputs
+projects/work/handle_test/exports/*
+!projects/work/handle_test/exports/.gitkeep
+
+# Photo reconstruction verification bundles (STEP/STL/3MF)
+exports/verification/
+
 # IDE
 .idea/
 *.swp

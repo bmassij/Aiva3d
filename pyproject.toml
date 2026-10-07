@@ -25,4 +25,4 @@ testpaths = ["tests"]
 pythonpath = ["."]
 
 [tool.setuptools.packages.find]
-include = ["cad*", "exporters*", "preview*", "ui*"]
+include = ["aiva3d*", "cad*", "exporters*", "preview*", "ui*", "projects*"]

@@ -1,89 +1,137 @@
-# Handle test — reference analysis
+# Handle / grip — reference & design analysis
 
 **Project:** `projects/work/handle_test`  
-**Grid scale (when photos present):** 1 square = **1 cm** = **10 mm**  
-**Status:** Initial analysis pass — **no reference photographs were on disk at generation time.** Upload images via CAD AI UI or copy into `reference/` and `projects/work/handle_test/reference/`.
+**Authoritative measurements:** `reference_measurements.json` (also `reference/reference_measurements.json`)
 
-## 1. Visible geometry (from customer text + expected photos)
+---
 
-| Element | Notes |
-|---------|--------|
-| Existing handvat / grip | Primary reconstruction target |
-| Graph paper backdrop | Dimensional reference (10 mm per square) |
-| Metal assembly | **Out of scope** — do not remodel unless required by photos |
-| Inner hard material | Structural / non-foam grip core |
-| Outer soft material | VariShore or similar foam-like shell |
-
-## 2. Measured dimensions (from 1 cm grid)
-
-| Dimension | Value (mm) | Confidence |
-|-----------|------------|------------|
-| — | *None committed* | Photos not available for measurement in this pass |
-
-**Action:** Measure along grip length, outer diameter, bend offset, and mounting features from uploaded photos using the 10 mm grid.
-
-## 3. Inferred dimensions
-
-| Item | Inference | Confidence |
-|------|-----------|------------|
-| Dual-wall grip | Customer requires hard inner + soft outer | High (text) |
-| Grip follows curved path | Visible handle shape in photos (when uploaded) | Pending photos |
-
-## 4. Assumptions (not measured)
-
-| Parameter | Placeholder | Confidence |
-|-----------|-------------|------------|
-| `centerline_points_mm` | 5-point spline in XZ, 180 mm span | **Low** |
-| `core_radius_mm` | 11 mm | **Low** |
-| `outer_layer_thickness_mm` | 4 mm VariShore wall | **Low–medium** |
-| `clearance_mm` | 0.2 mm print interface | **Medium** |
-
-## 5. Unknown dimensions
-
-- Exact grip length from photos  
-- Outer diameter at widest point  
-- Mounting interface to metal parts (if any)  
-- End-cap geometry at grip terminations  
-
-## 6. Proposed centerline
-
-- **Plane:** XZ (length along +X, vertical bend in Z)  
-- **Type:** CadQuery spline through `centerline_points_mm` in `parameters.py`  
-- **Rationale:** Allows tracing the photographed grip once points are picked on the grid  
-
-## 7. Proposed grip diameter
-
-| Layer | Radius (mm) | Provenance |
-|-------|-------------|------------|
-| Hard core | `core_radius_mm` (default 11) | ASSUMED |
-| Outer (foam) | `core_radius_mm + outer_layer_thickness_mm` | CALCULATED |
-
-## 8. Hard inner layer
-
-- Solid sweep along centerline at `core_radius_mm`  
-- Exported as `handle_test_hard_*`  
-
-## 9. Soft outer layer
-
-- Shell: outer sweep minus inner void (`core_radius_mm + clearance_mm`)  
-- Exported as `handle_test_soft_*`  
-
-## 10. Confidence summary
-
-| Dimension | Confidence |
-|-----------|------------|
-| Grid scale 10 mm | High (stated) |
-| Dual material split | High (customer) |
-| Centerline coordinates | **Low** until photo trace |
-| Core / wall thickness | **Low** until photo cross-section |
-
-## Customer instruction (preserved)
+## Customer requirement (original — Limburgish)
 
 > Maar ze motte zo diek waere wie un handvat. Wuurt in hard en zacht geprint dus binnen en boete kant van de greep. Met varioshore. Schuim en neet schuim zekmaar. Kiek ff wat de richtlijnen zien veur un handvat rechttoe rechtaan. values zijn 1 bij 1 cm
 
-## Next steps
+### English interpretation
 
-1. Upload reference photos in CAD AI.  
-2. Measure centerline points and diameters using 10 mm grid.  
-3. Update `parameters.py` — move values from ASSUMED to MEASURED with notes.  
-4. Regenerate and compare side-by-side in the UI.  
+- Grip thickness appropriate for a **handle**.
+- **Hard inner** + **soft outer** (VariShore / foam-like shell).
+- Check **ergonomic guidelines** for a straightforward handle.
+- **Graph paper:** 1 × 1 cm squares.
+
+---
+
+## Grid calibration — KNOWN
+
+| Item | Value | Classification |
+|------|-------|----------------|
+| Square size | **10.0 × 10.0 mm** | **KNOWN** (physical paper) |
+
+---
+
+## Authoritative dimensions — MEASURED / CALCULATED
+
+| Quantity | Value | Classification | Source |
+|----------|-------|----------------|--------|
+| Grip length | **130 mm** | **MEASURED** | 13.0 grid squares × 10 mm |
+| Grip outer diameter | **30 mm** | **MEASURED** | 3.0 grid squares × 10 mm |
+| Hard core diameter | **11.1 mm** | **MEASURED** | Bare-metal rod (~1.1 squares × 10 mm) |
+| Soft wall (material, radial) | **9.20 mm** | **CALCULATED** | 15.0 − (5.55 + 0.25) mm |
+| Hard/soft clearance | **0.25 mm** | **ASSUMED** | Dual-print interface (`design_constants.py`) |
+
+Automated CV spans (~150 mm / ~36 mm) are **comparison only** — not used for CAD.
+
+---
+
+## ERGONOMIC DESIGN CHECK
+
+### 1. Customer requirement
+
+Customer asked to review normal ergonomic guidelines for a straightforward handgrip (“recht toe recht aan”), without replacing the photographed object.
+
+### 2. Measured photographic dimensions
+
+- **OD 30 mm**, length **130 mm**, core **11.1 mm** (grid-derived).
+
+### 3. Ergonomic reference range
+
+Cylindrical / power-grip guidance commonly cites roughly **30–45 mm** diameter; some studies highlight **~35 mm** as comfortable in maximum-grip tasks. Optimum depends on **hand size**, **task**, and **grip force**.
+
+### 4. Comparison: 30 mm vs guidance
+
+30 mm sits at the **lower end** of the typical cylindrical range but remains **within** the often-cited band.
+
+### 5. Why 30 mm is acceptable here
+
+The **physical sleeve on the reference photos** measures ~3 grid squares → **30 mm**. Ergonomic literature supports handles in this range; smaller diameters can suit smaller hands or finger-wrap grips.
+
+### 6. Effect of soft VariShore outer layer
+
+Compressible foam reduces peak pressure and can feel **larger/ softer** than nominal CAD diameter under load. **CAD uses nominal printed OD (30 mm).**
+
+### 7. Effect of 11.1 mm hard core
+
+Provides structural stiffness and bore matching the metal rod scale; soft shell carries compliance.
+
+### 8. Compression during use
+
+**Not modeled in CAD.** Effective diameter under hand force depends on material batch, print process, and pressure — document separately; do not alter authoritative 30 mm OD.
+
+### 9. Unknowns
+
+- User hand size and exact task (precision vs power grip).
+- Out-of-plane bend of rod (only plan-view photos).
+- VariShore formulation and print parameters.
+
+### 10. Final design decision
+
+**Keep 30 mm OD and 130 mm length** from grid metrology. Ergonomic review: **acceptable** for a cylindrical power grip at the lower end of common guidance. Optional **~35 mm OD variant** may be explored later as a **separate branch**, not as replacement of photo reconstruction.
+
+---
+
+## Centerline strategy — INFERRED
+
+- **Method:** `three_point_arc_from_traced_leg`
+- **Bottom / top:** from scaled sleeve trace on the right D-leg (e.g. bottom X ≈ 3.9 mm, top at loop inner corner X = 0).
+- **Mid:** oval right-leg equator (outward X); ends sit inward on the D-curve over the 130 mm sleeve.
+- **Reference metal:** same arc shape extended to full loop height (~215 mm) — one continuous right leg, not sleeve arc + straight vertical.
+- **Why not dense polyline:** multi-segment sweeps failed OCC validity for the hard core; arc is the stable compromise.
+- **Limitation:** plan-view trace only; no side elevation.
+
+---
+
+## Material strategy
+
+| Part | Role | CAD |
+|------|------|-----|
+| Hard core | Structural inner | Separate solid Ø11.1 mm |
+| Soft outer | VariShore shell | Separate solid OD 30 mm, inner void = core + 0.25 mm clearance |
+
+---
+
+## Photo files
+
+| File | Role |
+|------|------|
+| `reference/WhatsApp Image 2026-10-02 at 20.16.42 (1).jpeg` | Sleeved grip — primary length/OD counts |
+| `reference/WhatsApp Image 2026-10-02 at 20.16.42.jpeg` | Bare metal — core diameter |
+| `reference/calibrated/*.jpg` | Grid overlays |
+
+---
+
+## Reference metal handle (context only)
+
+`reference_geometry.py` builds **OriginalMetalHandle** from photo-supported plan dimensions:
+
+| Region | Classification |
+|--------|----------------|
+| Rod Ø 11.1 mm | MEASURED |
+| Loop plan bbox (full dark mask) | 163.3 × 215.5 mm | MEASURED | Includes square shaft — **not** used for D-loop CAD width |
+| Loop rope plan (ROI, no shaft) | ~98 × ~162 mm | MEASURED | Bare-metal crop; drives `metal_loop` in JSON |
+| Top bar / left leg / bottom arc | `metal_loop` + `loop_plan.py` | INFERRED | Hub-to-outer ~57 mm (≈5.7 grid squares); left extent from loop ROI |
+| Square bar stock, welds, out-of-plane bend | UNKNOWN (not modeled) |
+
+Production **HardCore** / **SoftGrip** remain separate and are not fused into reference metal.
+
+## Validation & exports
+
+- `python scripts/export_handle_final.py` → `projects/work/handle_test/exports/`
+- `python scripts/build_freecad_handle.py` → `handle_assembly.FCStd`
+- Verification: `exports/verification/handle_test/` (separate from production exports)

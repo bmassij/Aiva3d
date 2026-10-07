@@ -1,90 +1,169 @@
 """
-Parametric handle/grip — all dimensions in millimeters.
 
-Provenance and confidence are explicit. Update centerline points from graph-paper photos
-(1 square = 10 mm). Do not treat ASSUMED values as measured.
+Parametric grip — millimeters.
+
+
+
+Authoritative dimensions load from reference_measurements.json (grid: 10 mm / square).
+
 """
+
+
 
 from __future__ import annotations
 
+
+
 from dataclasses import dataclass, field
+
 from typing import List, Tuple
 
-from cad.utilities.parameters import DataProvenance, Dimension
 
-# --- Centerline in XZ plane (mm): (x, z) along grip length ---
-# ASSUMED placeholder until traced from reference photos.
-CENTERLINE_POINTS_MM: List[Tuple[float, float]] = [
-    (0.0, 0.0),
-    (45.0, 6.0),
-    (90.0, 14.0),
-    (135.0, 10.0),
-    (180.0, 0.0),
-]
 
-DIMENSIONS = {
-    "grip_length_mm": Dimension(
-        "grip_length_mm",
-        180.0,
-        provenance=DataProvenance.ASSUMED,
-        notes="End-to-end along X from placeholder centerline; remeasure from photos.",
-    ),
-    "core_radius_mm": Dimension(
-        "core_radius_mm",
-        11.0,
-        provenance=DataProvenance.ASSUMED,
-        notes="Hard inner grip radius; tune to photo cross-section.",
-    ),
-    "outer_layer_thickness_mm": Dimension(
-        "outer_layer_thickness_mm",
-        4.0,
-        provenance=DataProvenance.ASSUMED,
-        notes="VariShore / foam shell wall thickness.",
-    ),
-    "bend_radius_mm": Dimension(
-        "bend_radius_mm",
-        25.0,
-        provenance=DataProvenance.ASSUMED,
-        notes="Approximate spline bend; derived visually when photos available.",
-    ),
-    "clearance_mm": Dimension(
-        "clearance_mm",
-        0.2,
-        provenance=DataProvenance.CALCULATED,
-        notes="Interface clearance between hard and soft (print).",
-    ),
-}
+from projects.work.handle_test.design_constants import (
+
+    GRIP_OUTER_DIAMETER_MM,
+
+    HARD_SOFT_CLEARANCE_MM,
+
+)
+
+from projects.work.handle_test.measurements_loader import parameters_from_measurements
+
+
+
 
 
 @dataclass
+
 class HandleParameters:
-    centerline_points_mm: List[Tuple[float, float]] = field(default_factory=lambda: list(CENTERLINE_POINTS_MM))
-    core_radius_mm: float = 11.0
-    outer_layer_thickness_mm: float = 4.0
+
+    centerline_points_mm: List[Tuple[float, float]] = field(default_factory=list)
+
+    core_radius_mm: float = 5.0
+
+    outer_radius_mm: float = 15.0
+
     clearance_mm: float = 0.2
 
-    @property
-    def outer_radius_mm(self) -> float:
-        return self.core_radius_mm + self.outer_layer_thickness_mm
+
 
     @property
-    def inner_cut_radius_mm(self) -> float:
+
+    def soft_inner_radius_mm(self) -> float:
+
         return self.core_radius_mm + self.clearance_mm
 
+
+
+    @property
+
+    def soft_wall_thickness_mm(self) -> float:
+
+        return self.outer_radius_mm - self.soft_inner_radius_mm
+
+
+
+    @property
+
+    def inner_cut_radius_mm(self) -> float:
+
+        return self.soft_inner_radius_mm
+
+
+
+    def validate_relationships(self) -> None:
+
+        inner = self.core_radius_mm + self.clearance_mm
+
+        if abs(self.soft_inner_radius_mm - inner) > 1e-6:
+
+            raise ValueError("soft_inner_radius must equal core_radius + clearance")
+
+        wall = self.outer_radius_mm - self.soft_inner_radius_mm
+
+        if abs(self.soft_wall_thickness_mm - wall) > 1e-6:
+
+            raise ValueError("soft_wall_thickness must equal outer_radius - soft_inner_radius")
+
+
+
     def summary(self) -> dict:
+
         return {
+
             "centerline_points_mm": self.centerline_points_mm,
+
             "core_radius_mm": self.core_radius_mm,
-            "outer_layer_thickness_mm": self.outer_layer_thickness_mm,
-            "outer_radius_mm": self.outer_radius_mm,
+
             "clearance_mm": self.clearance_mm,
+
+            "soft_inner_radius_mm": self.soft_inner_radius_mm,
+
+            "outer_radius_mm": self.outer_radius_mm,
+
+            "soft_wall_thickness_mm": self.soft_wall_thickness_mm,
+
         }
 
 
-def default_parameters() -> HandleParameters:
-    return HandleParameters(
-        centerline_points_mm=list(CENTERLINE_POINTS_MM),
-        core_radius_mm=float(DIMENSIONS["core_radius_mm"].value),
-        outer_layer_thickness_mm=float(DIMENSIONS["outer_layer_thickness_mm"].value),
-        clearance_mm=float(DIMENSIONS["clearance_mm"].value),
+
+
+
+def parameters_from_sliders(
+
+    centerline_points_mm: List[Tuple[float, float]],
+
+    core_radius_mm: float,
+
+    clearance_mm: float,
+
+    outer_radius_mm: float | None = None,
+
+) -> HandleParameters:
+
+    """Build from UI: core + clearance + authoritative soft outer radius (30 mm OD)."""
+
+    outer = float(outer_radius_mm if outer_radius_mm is not None else GRIP_OUTER_DIAMETER_MM / 2.0)
+
+    params = HandleParameters(
+
+        centerline_points_mm=list(centerline_points_mm),
+
+        core_radius_mm=float(core_radius_mm),
+
+        outer_radius_mm=outer,
+
+        clearance_mm=float(clearance_mm),
+
     )
+
+    params.validate_relationships()
+
+    return params
+
+
+
+
+
+def default_parameters() -> HandleParameters:
+
+    data = parameters_from_measurements()
+
+    params = HandleParameters(
+
+        centerline_points_mm=list(data["centerline_points_mm"]),
+
+        core_radius_mm=float(data["core_radius_mm"]),
+
+        outer_radius_mm=float(data["outer_radius_mm"]),
+
+        clearance_mm=HARD_SOFT_CLEARANCE_MM,
+
+    )
+
+    params.validate_relationships()
+
+    return params
+
+

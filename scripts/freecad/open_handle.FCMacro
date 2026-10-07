@@ -1,0 +1,79 @@
+# -*- coding: utf-8 -*-
+"""Open exploded printable halves in FreeCAD (Part workbench, fitted camera)."""
+
+import os
+
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part
+
+EXPORTS = os.path.normpath(r"D:\AI\3d\projects\work\handle_test\exports")
+OUT = os.path.join(EXPORTS, "handle_zichtbaar.FCStd")
+ASSEMBLY = os.path.join(EXPORTS, "handle_assembly.FCStd")
+GAP = 32.0
+
+# Printable grip clamshell only (tuinslang-vervanger). No metal D-loop here.
+PARTS = [
+    ("handle_hard_plus.step", "HardPlus", (0.17, 0.42, 0.69), 0, "hard_print", GAP),
+    ("handle_hard_minus.step", "HardMinus", (0.17, 0.42, 0.69), 0, "hard_print", -GAP),
+    ("handle_soft_plus.step", "SoftPlus", (0.22, 0.63, 0.41), 40, "varishore_foam", GAP),
+    ("handle_soft_minus.step", "SoftMinus", (0.22, 0.63, 0.41), 40, "varishore_foam", -GAP),
+    ("handle_rails_male.step", "Slider", (0.90, 0.45, 0.05), 0, "click_hard", -GAP),
+    ("handle_click_male.step", "Haak", (0.90, 0.15, 0.15), 0, "click_hard", -GAP),
+]
+
+
+def _fit_camera(doc):
+    Gui.Selection.clearSelection()
+    for obj in doc.Objects:
+        if hasattr(obj, "Shape") and not obj.Shape.isNull():
+            Gui.Selection.addSelection(doc.Name, obj.Name)
+    Gui.SendMsgToActiveView("ViewFit")
+    Gui.Selection.clearSelection()
+    try:
+        view = Gui.activeDocument().activeView()
+        view.viewIsometric()
+        view.fitAll()
+        cam = view.getCameraNode()
+        cam.nearDistance.setValue(1.0)
+        cam.farDistance.setValue(10000.0)
+    except Exception:
+        pass
+
+
+doc = App.newDocument("handle_zichtbaar")
+App.setActiveDocument(doc.Name)
+try:
+    Gui.activateWorkbench("PartWorkbench")
+except Exception:
+    pass
+
+loaded = []
+for filename, label, color, transp, material, dz in PARTS:
+    path = os.path.join(EXPORTS, filename)
+    if not os.path.isfile(path):
+        continue
+    shape = Part.read(path)
+    if shape.isNull() or shape.Volume <= 0:
+        continue
+    obj = doc.addObject("Part::Feature", label)
+    obj.Shape = shape
+    obj.Label = label
+    if not hasattr(obj, "Material"):
+        obj.addProperty("App::PropertyString", "Material", "Design", "")
+    obj.Material = material
+    obj.Placement.Base.z = dz
+    obj.ViewObject.ShapeColor = color
+    obj.ViewObject.Transparency = transp
+    obj.ViewObject.Visibility = True
+    loaded.append("%s z=%s V=%.1f" % (label, dz, shape.Volume))
+
+doc.recompute()
+_fit_camera(doc)
+doc.saveAs(OUT)
+try:
+    doc.saveCopy(ASSEMBLY)
+except Exception:
+    doc.saveAs(ASSEMBLY)
+print("Loaded exploded:", loaded)
+print("Saved:", OUT)

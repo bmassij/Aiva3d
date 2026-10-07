@@ -1,0 +1,450 @@
+{
+  "grid": {
+    "square_width_mm": 10.0,
+    "square_height_mm": 10.0,
+    "source": "physical graph paper visible in reference photographs",
+    "certainty": "known"
+  },
+  "photo_grid_counts_verified": {
+    "grip_length_squares": 13.0,
+    "grip_length_core_squares": 11.0,
+    "grip_od_squares": 3.0,
+    "core_diameter_mm": 11.1,
+    "method": "tuinslang_mesh_on_grid_paper",
+    "confidence": "medium",
+    "cv_tuinslang_span_squares": 13.0,
+    "notes": "Tuinslang outer span 13\u00d710 mm on grid; ~11 cells fully filled, 2 end cells partial. Orange overlay = mesh bounds only (not wide ROI). cv_tuinslang_span_squares is automated row span for comparison only."
+  },
+  "photos": [
+    {
+      "file": "WhatsApp Image 2026-10-02 at 20.16.42 (1).jpeg",
+      "image_size": [
+        1536,
+        2048
+      ],
+      "calibrations": [
+        {
+          "region": "grip_right",
+          "spacing_px_x": 98.0,
+          "spacing_px_y": 97.0,
+          "mm_per_px_x": 0.10204081632653061,
+          "mm_per_px_y": 0.10309278350515463,
+          "perspective_delta_pct": 1.0204081632653061
+        },
+        {
+          "region": "left_reference",
+          "spacing_px_x": 113.5,
+          "spacing_px_y": 96.0,
+          "mm_per_px_x": 0.0881057268722467,
+          "mm_per_px_y": 0.10416666666666667,
+          "perspective_delta_pct": 15.418502202643172
+        }
+      ],
+      "measurements": [
+        {
+          "name": "tuinslang_span_vertical_mm",
+          "value_mm": 130.0,
+          "source_photo": "WhatsApp Image 2026-10-02 at 20.16.42 (1).jpeg",
+          "measurement_method": "13 grid squares \u00d7 10 mm (grid-snapped tuinslang span)",
+          "confidence": "medium",
+          "notes": "Reinforced hose sleeve on metal grip; outer span incl. partial end cells.",
+          "grid_squares": 13.0,
+          "perspective_note": "Local grid px spacing Y=97.0 vs left region 96.0 (perspective \u0394 1.0%). Values use square_count \u00d7 10 mm."
+        },
+        {
+          "name": "grip_outer_span_vertical_mm",
+          "value_mm": 130.0,
+          "source_photo": "WhatsApp Image 2026-10-02 at 20.16.42 (1).jpeg",
+          "measurement_method": "13 grid squares \u00d7 10 mm (grid-snapped tuinslang span)",
+          "confidence": "medium",
+          "notes": "Alias of tuinslang_span_vertical_mm for legacy readers.",
+          "grid_squares": 13.0,
+          "perspective_note": "Local grid px spacing Y=97.0 vs left region 96.0 (perspective \u0394 1.0%). Values use square_count \u00d7 10 mm."
+        },
+        {
+          "name": "grip_outer_diameter_mm",
+          "value_mm": 36.8,
+          "source_photo": "WhatsApp Image 2026-10-02 at 20.16.42 (1).jpeg",
+          "measurement_method": "grid-calibrated mid-row width: squares \u00d7 10 mm",
+          "confidence": "medium",
+          "notes": "Plan-view width at sleeve mid-height.",
+          "grid_squares": 3.68,
+          "perspective_note": "Local grid px spacing Y=97.0 vs left region 96.0 (perspective \u0394 1.0%). Values use square_count \u00d7 10 mm."
+        }
+      ],
+      "overlay_path": "D:\\AI\\3d\\projects\\work\\handle_test\\reference\\calibrated\\calibrated_WhatsApp Image 2026-10-02 at 20.16.42 (1).jpg"
+    },
+    {
+      "file": "WhatsApp Image 2026-10-02 at 20.16.42.jpeg",
+      "image_size": [
+        1536,
+        2048
+      ],
+      "calibrations": [
+        {
+          "region": "full_frame",
+          "spacing_px_x": 94.0,
+          "spacing_px_y": 95.0,
+          "mm_per_px_x": 0.10638297872340426,
+          "mm_per_px_y": 0.10526315789473684,
+          "perspective_delta_pct": 1.0526315789473684
+        }
+      ],
+      "measurements": [
+        {
+          "name": "metal_loop_bbox_height_mm",
+          "value_mm": 215.5,
+          "source_photo": "WhatsApp Image 2026-10-02 at 20.16.42.jpeg",
+          "measurement_method": "dark metal mask bbox \u00d7 local grid",
+          "confidence": "medium",
+          "notes": "",
+          "grid_squares": 21.55,
+          "perspective_note": ""
+        },
+        {
+          "name": "metal_loop_bbox_width_mm",
+          "value_mm": 163.3,
+          "source_photo": "WhatsApp Image 2026-10-02 at 20.16.42.jpeg",
+          "measurement_method": "dark metal mask bbox \u00d7 local grid",
+          "confidence": "medium",
+          "notes": "",
+          "grid_squares": 16.33,
+          "perspective_note": ""
+        },
+        {
+          "name": "metal_loop_rope_plan_width_mm",
+          "value_mm": 84.9,
+          "source_photo": "WhatsApp Image 2026-10-02 at 20.16.42.jpeg",
+          "measurement_method": "loop ROI mask bbox \u00d7 local grid (excludes square shaft)",
+          "confidence": "medium",
+          "notes": "Use for reference D-loop plan width, not full dark mask.",
+          "grid_squares": 8.49,
+          "perspective_note": ""
+        },
+        {
+          "name": "metal_loop_rope_plan_height_mm",
+          "value_mm": 168.1,
+          "source_photo": "WhatsApp Image 2026-10-02 at 20.16.42.jpeg",
+          "measurement_method": "loop ROI mask bbox \u00d7 local grid (excludes square shaft)",
+          "confidence": "medium",
+          "notes": "",
+          "grid_squares": 16.81,
+          "perspective_note": ""
+        }
+      ],
+      "overlay_path": "D:\\AI\\3d\\projects\\work\\handle_test\\reference\\calibrated\\calibrated_WhatsApp Image 2026-10-02 at 20.16.42.jpg"
+    }
+  ],
+  "grip": {
+    "length_mm": 130.0,
+    "outer_diameter_mm": 30.0,
+    "core_diameter_mm": 11.1,
+    "length_mm_automated_cv": 130.0,
+    "outer_diameter_mm_automated_cv": 36.8,
+    "centerline_points_mm": [
+      [
+        -13.53,
+        0.0
+      ],
+      [
+        -0.0,
+        65.0
+      ],
+      [
+        -13.48,
+        130.0
+      ]
+    ],
+    "centerline_traced_mm": [
+      [
+        0.0,
+        161.46
+      ],
+      [
+        0.0,
+        158.23
+      ],
+      [
+        0.42,
+        155.0
+      ],
+      [
+        5.31,
+        151.78
+      ],
+      [
+        7.92,
+        148.55
+      ],
+      [
+        8.96,
+        145.32
+      ],
+      [
+        9.32,
+        142.09
+      ],
+      [
+        7.66,
+        138.86
+      ],
+      [
+        8.33,
+        135.63
+      ],
+      [
+        9.32,
+        132.4
+      ],
+      [
+        8.33,
+        129.17
+      ],
+      [
+        7.66,
+        125.94
+      ],
+      [
+        7.34,
+        122.71
+      ],
+      [
+        7.14,
+        119.48
+      ],
+      [
+        7.5,
+        116.26
+      ],
+      [
+        7.08,
+        113.03
+      ],
+      [
+        7.08,
+        109.8
+      ],
+      [
+        6.41,
+        106.57
+      ],
+      [
+        7.08,
+        103.34
+      ],
+      [
+        7.29,
+        100.11
+      ],
+      [
+        6.98,
+        96.88
+      ],
+      [
+        7.24,
+        93.65
+      ],
+      [
+        7.08,
+        90.42
+      ],
+      [
+        7.45,
+        87.19
+      ],
+      [
+        7.08,
+        83.96
+      ],
+      [
+        6.98,
+        80.73
+      ],
+      [
+        6.77,
+        77.5
+      ],
+      [
+        6.72,
+        74.28
+      ],
+      [
+        6.61,
+        71.05
+      ],
+      [
+        6.88,
+        67.82
+      ],
+      [
+        7.34,
+        64.59
+      ],
+      [
+        6.93,
+        61.36
+      ],
+      [
+        6.93,
+        58.13
+      ],
+      [
+        7.5,
+        54.9
+      ],
+      [
+        7.76,
+        51.67
+      ],
+      [
+        7.71,
+        48.44
+      ],
+      [
+        9.11,
+        45.21
+      ],
+      [
+        9.06,
+        41.98
+      ],
+      [
+        7.92,
+        38.76
+      ],
+      [
+        7.97,
+        35.53
+      ],
+      [
+        9.11,
+        32.3
+      ],
+      [
+        10.78,
+        29.07
+      ],
+      [
+        7.86,
+        25.84
+      ],
+      [
+        10.26,
+        22.61
+      ],
+      [
+        11.72,
+        19.38
+      ],
+      [
+        13.85,
+        16.15
+      ],
+      [
+        13.96,
+        12.92
+      ],
+      [
+        13.28,
+        9.69
+      ],
+      [
+        11.67,
+        6.46
+      ],
+      [
+        9.69,
+        3.23
+      ],
+      [
+        5.73,
+        0.0
+      ]
+    ],
+    "anchor_y_mm": 19.0
+  },
+  "all_measurements": [
+    {
+      "name": "tuinslang_span_vertical_mm",
+      "value_mm": 130.0,
+      "source_photo": "WhatsApp Image 2026-10-02 at 20.16.42 (1).jpeg",
+      "measurement_method": "13 grid squares \u00d7 10 mm (grid-snapped tuinslang span)",
+      "confidence": "medium",
+      "notes": "Reinforced hose sleeve on metal grip; outer span incl. partial end cells.",
+      "grid_squares": 13.0,
+      "perspective_note": "Local grid px spacing Y=97.0 vs left region 96.0 (perspective \u0394 1.0%). Values use square_count \u00d7 10 mm."
+    },
+    {
+      "name": "grip_outer_span_vertical_mm",
+      "value_mm": 130.0,
+      "source_photo": "WhatsApp Image 2026-10-02 at 20.16.42 (1).jpeg",
+      "measurement_method": "13 grid squares \u00d7 10 mm (grid-snapped tuinslang span)",
+      "confidence": "medium",
+      "notes": "Alias of tuinslang_span_vertical_mm for legacy readers.",
+      "grid_squares": 13.0,
+      "perspective_note": "Local grid px spacing Y=97.0 vs left region 96.0 (perspective \u0394 1.0%). Values use square_count \u00d7 10 mm."
+    },
+    {
+      "name": "grip_outer_diameter_mm",
+      "value_mm": 36.8,
+      "source_photo": "WhatsApp Image 2026-10-02 at 20.16.42 (1).jpeg",
+      "measurement_method": "grid-calibrated mid-row width: squares \u00d7 10 mm",
+      "confidence": "medium",
+      "notes": "Plan-view width at sleeve mid-height.",
+      "grid_squares": 3.68,
+      "perspective_note": "Local grid px spacing Y=97.0 vs left region 96.0 (perspective \u0394 1.0%). Values use square_count \u00d7 10 mm."
+    },
+    {
+      "name": "metal_loop_bbox_height_mm",
+      "value_mm": 215.5,
+      "source_photo": "WhatsApp Image 2026-10-02 at 20.16.42.jpeg",
+      "measurement_method": "dark metal mask bbox \u00d7 local grid",
+      "confidence": "medium",
+      "notes": "",
+      "grid_squares": 21.55,
+      "perspective_note": ""
+    },
+    {
+      "name": "metal_loop_bbox_width_mm",
+      "value_mm": 163.3,
+      "source_photo": "WhatsApp Image 2026-10-02 at 20.16.42.jpeg",
+      "measurement_method": "dark metal mask bbox \u00d7 local grid",
+      "confidence": "medium",
+      "notes": "",
+      "grid_squares": 16.33,
+      "perspective_note": ""
+    },
+    {
+      "name": "metal_loop_rope_plan_width_mm",
+      "value_mm": 84.9,
+      "source_photo": "WhatsApp Image 2026-10-02 at 20.16.42.jpeg",
+      "measurement_method": "loop ROI mask bbox \u00d7 local grid (excludes square shaft)",
+      "confidence": "medium",
+      "notes": "Use for reference D-loop plan width, not full dark mask.",
+      "grid_squares": 8.49,
+      "perspective_note": ""
+    },
+    {
+      "name": "metal_loop_rope_plan_height_mm",
+      "value_mm": 168.1,
+      "source_photo": "WhatsApp Image 2026-10-02 at 20.16.42.jpeg",
+      "measurement_method": "loop ROI mask bbox \u00d7 local grid (excludes square shaft)",
+      "confidence": "medium",
+      "notes": "",
+      "grid_squares": 16.81,
+      "perspective_note": ""
+    }
+  ],
+  "metal_loop": {
+    "plan_height_mm": 168.1,
+    "hub_to_right_outer_mm": 57.0,
+    "confidence": "inferred",
+    "source": "bare-metal loop ROI (excludes square shaft) + grid span ~5.7 squares hub-to-outer arc",
+    "top_bar_left_x_mm": -47.0,
+    "left_leg_bottom_x_mm": -53.0,
+    "left_leg_arc_split_y_mm": 56.3,
+    "bottom_arc_mid_x_mm": -22.3,
+    "bottom_arc_mid_y_mm": 27.0,
+    "anchor_y_mm": 19.0
+  }
+}

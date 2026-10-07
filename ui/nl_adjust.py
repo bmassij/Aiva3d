@@ -38,8 +38,10 @@ def apply_instruction(instruction: str, params: HandleParameters) -> tuple[Handl
 
     for match in _WALL_NUM.finditer(text):
         val = float(match.group(1))
-        updated.outer_layer_thickness_mm = max(0.5, val)
-        notes.append(f"Set outer_layer_thickness_mm to {updated.outer_layer_thickness_mm:.2f}.")
+        updated.outer_radius_mm = updated.soft_inner_radius_mm + max(0.5, val)
+        notes.append(
+            f"Set soft wall thickness to {val:.2f} mm (outer_radius_mm={updated.outer_radius_mm:.2f})."
+        )
 
     if _THICKER.search(text) and not notes:
         updated.core_radius_mm = min(40.0, updated.core_radius_mm + _DELTA)

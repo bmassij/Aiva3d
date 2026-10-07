@@ -24,6 +24,9 @@ def test_handle_build_validates():
     stats = validate_handle_pair(hard, soft, params)
     assert stats["hard_volume_mm3"] > 0
     assert stats["soft_volume_mm3"] > 0
+    # Photo-measured sleeve span ~85 mm on grid
+    assert 125 <= stats["grip_span_y_mm"] <= 135
+    assert 28 <= stats["max_outer_width_x_mm"] <= 58
 
 
 def test_hard_and_soft_solids():

@@ -10,20 +10,72 @@ import streamlit as st
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+_UI = Path(__file__).resolve().parent
+if str(_UI) not in sys.path:
+    sys.path.insert(0, str(_UI))
+
+import importlib
+
+import projects.work.handle_test.design_constants as _design_constants
+import projects.work.handle_test.measurements_loader as _measurements_loader
+import projects.work.handle_test.parameters as _handle_parameters
+
+importlib.reload(_design_constants)
+importlib.reload(_measurements_loader)
+importlib.reload(_handle_parameters)
 
 from exporters.pipeline import export_3mf, export_step, export_stl
-from projects.work.handle_test import model as handle_model
-from projects.work.handle_test.parameters import HandleParameters, default_parameters
-from projects.work.handle_test.validation import validate_handle_pair
+import projects.work.handle_test.model as handle_model
+
+importlib.reload(handle_model)
+
+import projects.work.handle_test.validation as _handle_validation
+
+importlib.reload(_handle_validation)
+
+from projects.work.handle_test.parameters import (
+    HandleParameters,
+    default_parameters,
+    parameters_from_sliders,
+)
+from projects.work.handle_test.validation import (
+    validate_grip_position_on_reference_handle,
+    validate_handle_pair,
+)
+from cad.utilities.validation import assert_valid_solid
 from ui.design_record import (
     HANDLE_CUSTOMER_TEXT,
     DesignRecord,
     design_record_from_handle_customer_text,
 )
-from ui.mesh_viewer import figure_from_workpieces, figure_side_by_side
+try:
+    from ui.mesh_viewer import (
+        figure_exploded_clamshell,
+        figure_from_workpieces,
+        figure_full_handle,
+        figure_material_section,
+        figure_side_by_side,
+    )
+except ImportError:
+    from mesh_viewer import (  # type: ignore[no-redef]
+        figure_exploded_clamshell,
+        figure_from_workpieces,
+        figure_full_handle,
+        figure_material_section,
+        figure_side_by_side,
+    )
 from ui.model_session import BuiltModel, ModelSession
 from ui.nl_adjust import apply_instruction
+from ui.ergonomic_panel import render_ergonomic_panel, render_materials_panel
+from ui.measurements_panel import render_measurements_panel
+from ui.freecad_panel import render_freecad_panel
+from ui.cadquery_llm_panel import render_cadquery_llm_panel
 from ui.reference_images import list_reference_images, save_uploads_from_streamlit
+import projects.work.handle_test.reference_geometry as _reference_geometry
+
+importlib.reload(_reference_geometry)
+
+from projects.work.handle_test.reference_geometry import build_metal_rod_context
 
 PROJECTS = {
     "handle_test": {
@@ -40,17 +92,32 @@ def _init_state() -> None:
         st.session_state.design_record = design_record_from_handle_customer_text()
     if "params" not in st.session_state:
         st.session_state.params = default_parameters()
+    if "measurements_applied" not in st.session_state:
+        from projects.work.handle_test.measurements_loader import load_measurements_doc
+
+        st.session_state.measurements_applied = bool(load_measurements_doc())
+    if "show_reference_metal" not in st.session_state:
+        st.session_state.show_reference_metal = False
     if "project_id" not in st.session_state:
         st.session_state.project_id = "handle_test"
 
 
 def _build_handle(params: HandleParameters) -> BuiltModel:
     hard, soft = handle_model.build(params)
+    metal_rod = build_metal_rod_context(params)
     stats = validate_handle_pair(hard, soft, params)
+    assert_valid_solid(metal_rod, "metal_rod_context")
+    grip_pos = validate_grip_position_on_reference_handle(hard, params, metal_rod)
     return BuiltModel(
         hard_core=hard,
         soft_outer=soft,
-        metadata={"validation": stats, "parameters": params.summary()},
+        reference_metal=metal_rod,
+        metadata={
+            "validation": stats,
+            "metal_rod_context": {"role": "existing_rod_under_mesh", "diameter_mm": 11.1},
+            "grip_position": grip_pos,
+            "parameters": params.summary(),
+        },
     )
 
 
@@ -93,7 +160,60 @@ def main() -> None:
     params: HandleParameters = st.session_state.params
 
     st.title("Aiva3D — CAD AI")
-    st.caption("Parametric CadQuery workspace with reference-driven reverse engineering.")
+    st.caption("Parametric CadQuery workspace — 3D preview, FreeCAD-export, print-helften.")
+
+    params = st.session_state.params
+    if session.last_valid is None:
+        _run_build(params, note="auto-preview")
+
+    st.subheader("3D weergave")
+    from projects.work.handle_test.materials import legend_markdown_nl
+
+    st.markdown(legend_markdown_nl())
+    view_mode = st.radio(
+        "Weergave",
+        options=("hendel", "helften", "materialen", "foto"),
+        format_func=lambda k: {
+            "hendel": "Kaal metaal (D-lus, geen klik)",
+            "materialen": "Materialen (doorsnede: metaal / hard / schuim)",
+            "helften": "Handvat / tuinslang (slider + klik)",
+            "foto": "Foto-modus (staaf + hoes)",
+        }[k],
+        horizontal=True,
+        key="preview_view_mode",
+    )
+    try:
+        if view_mode == "hendel":
+            st.caption(
+                "Kale metalen D-lus van de foto: één vast stuk. Geen klik, geen tuinslang."
+            )
+            from pathlib import Path as _P
+
+            _png = _P(__file__).resolve().parents[1] / "projects/work/handle_test/exports/drawings/handle_bare_metal.png"
+            if _png.exists():
+                st.image(str(_png), caption="Plan-aanzicht (zelfde kant als de foto)")
+            st.plotly_chart(figure_full_handle(), use_container_width=True)
+        elif view_mode == "materialen":
+            st.caption("Grijs = bestaande staaf, blauw = hard, groen = VariShore (halve buitenlaag).")
+            st.plotly_chart(figure_material_section(), use_container_width=True)
+        elif view_mode == "helften":
+            st.caption(
+                "Alleen het handvat dat om de staaf gaat (vervangt de tuinslang). "
+                "Oranje = slider, rood = klikhaak. Het metaal zelf klikt niet."
+            )
+            st.plotly_chart(figure_exploded_clamshell("Helften — slider in inkeping + haak"), use_container_width=True)
+        elif session.last_valid is not None:
+            fig = figure_from_workpieces(
+                session.display_parts(session.last_valid, show_reference_metal=True),
+                title="Foto-modus",
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.warning("Model nog niet gebouwd.")
+    except Exception as exc:  # noqa: BLE001
+        st.error(f"3D preview mislukt: {exc}")
+
+    st.divider()
 
     with st.sidebar:
         st.header("Project")
@@ -127,6 +247,14 @@ def main() -> None:
             if len(refs) > 8:
                 st.caption(f"+ {len(refs) - 8} more")
 
+    render_measurements_panel()
+    render_ergonomic_panel()
+    render_materials_panel()
+    render_freecad_panel(params)
+
+    st.divider()
+    render_cadquery_llm_panel(params)
+
     col_left, col_right = st.columns(2)
     with col_left:
         st.subheader("Customer instruction (preserved)")
@@ -136,27 +264,53 @@ def main() -> None:
         with st.expander("Requirements & provenance"):
             st.json(record.to_dict())
 
-    st.subheader("Parameters (mm)")
+    st.subheader("CAD parameters (from reference_measurements.json)")
     c1, c2, c3 = st.columns(3)
     with c1:
-        core = st.number_input("Core radius", min_value=1.0, max_value=40.0, value=float(params.core_radius_mm))
-    with c2:
-        wall = st.number_input(
-            "Outer wall (VariShore)",
-            min_value=0.5,
-            max_value=15.0,
-            value=float(params.outer_layer_thickness_mm),
+        core = st.number_input(
+            "Hard core radius (mm)",
+            min_value=1.0,
+            max_value=40.0,
+            value=float(params.core_radius_mm),
         )
+    with c2:
+        clearance = st.number_input("Clearance (mm)", min_value=0.05, max_value=2.0, value=float(params.clearance_mm))
     with c3:
-        clearance = st.number_input("Clearance", min_value=0.05, max_value=2.0, value=float(params.clearance_mm))
+        outer_r = st.number_input(
+            "Soft shell outer radius (mm)",
+            min_value=5.0,
+            max_value=40.0,
+            value=float(params.outer_radius_mm),
+            help="Authoritative grip OD is 30 mm → 15.00 mm radius.",
+        )
+    inner_r = float(core) + float(clearance)
+    wall_t = float(outer_r) - inner_r
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Soft shell inner radius", f"{inner_r:.2f} mm")
+    m2.metric("Soft wall thickness", f"{wall_t:.2f} mm")
+    m3.metric("Soft shell outer radius", f"{float(outer_r):.2f} mm")
+    m4.metric("Grip OD", f"{float(outer_r) * 2:.1f} mm")
 
-    params = HandleParameters(
-        centerline_points_mm=list(params.centerline_points_mm),
-        core_radius_mm=float(core),
-        outer_layer_thickness_mm=float(wall),
-        clearance_mm=float(clearance),
+    if st.button("Apply photo measurements to parameters", use_container_width=True):
+        st.session_state.params = default_parameters()
+        st.session_state.measurements_applied = True
+        st.success("Parameters loaded from reference_measurements.json.")
+
+    params = st.session_state.params
+    base_centerline = (
+        list(default_parameters().centerline_points_mm)
+        if st.session_state.measurements_applied
+        else list(params.centerline_points_mm)
+    )
+    params = parameters_from_sliders(
+        base_centerline,
+        float(core),
+        float(clearance),
+        outer_radius_mm=float(outer_r),
     )
     st.session_state.params = params
+    if not st.session_state.measurements_applied:
+        st.warning("Apply photo measurements before generating CAD (grid-calibrated values).")
 
     st.subheader("Natural-language instruction")
     instruction = st.text_area(
@@ -190,32 +344,14 @@ def main() -> None:
         st.error(f"Last error: {session.last_error}")
 
     display = session.last_valid
-    if display is None and session.last_valid is None:
+    if display is None:
         st.info("No valid model yet. Click **Generate model**.")
 
-    if display is not None:
-        st.subheader("3D preview")
-        if session.comparison is not None:
-            left, right = figure_side_by_side(
-                session.display_parts(session.comparison),
-                session.display_parts(display),
-                left_title="Saved comparison",
-                right_title="Current model",
-            )
-            pc1, pc2 = st.columns(2)
-            with pc1:
-                st.plotly_chart(left, use_container_width=True)
-            with pc2:
-                st.plotly_chart(right, use_container_width=True)
-        else:
-            fig = figure_from_workpieces(session.display_parts(display), title="Current model")
-            st.plotly_chart(fig, use_container_width=True)
-
-        if export_clicked:
-            paths = _export_pair(display, "handle_test")
-            st.success("Exported hard + soft parts:")
-            for line in paths:
-                st.code(line, language=None)
+    if export_clicked and display is not None:
+        paths = _export_pair(display, "handle_test")
+        st.success("Exported hard + soft parts:")
+        for line in paths:
+            st.code(line, language=None)
 
     with st.expander("Session history"):
         st.write(session.history or ["No builds yet."])

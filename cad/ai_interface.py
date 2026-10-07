@@ -1,7 +1,8 @@
 """
 Future AI layer hook: map natural-language intent to structured parameters.
 
-Not an LLM implementation — only typed interfaces for a later orchestrator.
+CadQuery code generation and LM Studio providers live in ``aiva3d.ai`` (see
+``docs/CADQUERY_AI.md``). This module keeps template-registry build helpers.
 """
 
 from __future__ import annotations
@@ -12,6 +13,11 @@ from typing import Any, Callable, Dict, Optional
 import cadquery as cq
 
 from cad.utilities.parameters import ParametricModelMeta
+
+try:
+    from aiva3d.ai.types import CadSpecification  # noqa: F401
+except ImportError:
+    CadSpecification = None  # type: ignore[misc, assignment]
 
 
 @dataclass

@@ -13,3 +13,5 @@ plotly==6.0.1
 # Preview and tests
 matplotlib==3.10.9
 pytest==9.1.1
+opencv-python-headless>=4.8
+scipy>=1.10

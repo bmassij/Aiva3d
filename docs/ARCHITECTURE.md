@@ -11,7 +11,7 @@
 | Projects | `projects/work/`, `projects/examples/` | Active designs and verified examples |
 | Export | `exporters/pipeline.py` | STEP, STL, 3MF, OBJ with safe naming |
 | Preview | `preview/viewer.py` | Matplotlib mesh snapshot; optional VTK `show` |
-| AI hooks | `cad/ai_interface.py`, `ui/nl_adjust.py` | Typed and heuristic NL → parameters |
+| AI hooks | `cad/ai_interface.py`, `ui/nl_adjust.py`, `aiva3d/ai/` | Heuristic NL → parameters; LM Studio CadQuery + vision routing |
 
 ## Data flow
 

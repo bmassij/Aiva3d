@@ -11,5 +11,6 @@ When generating or editing CAD:
 1. Use mm and explicit parameters with `DataProvenance`.
 2. Implement `build()`; validate solids before export.
 3. Export through `exporters/pipeline.py`.
-4. Extend `cad/ai_interface.py` or `ui/nl_adjust.py` for NL→parameter flows — avoid ad-hoc parsing in geometry modules.
+4. Extend `cad/ai_interface.py`, `aiva3d/ai/`, or `ui/nl_adjust.py` for NL→parameter flows — avoid ad-hoc parsing in geometry modules.
 5. Run **`python -m pytest`** after substantive CAD changes.
+6. CadQuery LM Studio pipeline: see `docs/CADQUERY_AI.md`; diagnostic: `python -m aiva3d.ai.test_cadquery`.
