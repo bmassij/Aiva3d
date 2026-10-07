@@ -22,6 +22,32 @@ Eén GitHub-repo (**bmassij/Aiva3d**), **twee aparte Vercel-projecten** (twee UR
 
 **Pilot-volgorde (ideeën Crooijmans):** eerst **calculator** (Crooijmans-app + quote-API), daarna **slimme generatie** (klant PNG→3MF).
 
+## Productie-URL’s (AiVance-team, okt 2026)
+
+| App | Vercel-project | Production URL | Dashboard |
+|-----|----------------|----------------|-----------|
+| **Klant** | `aiva3d` | https://aiva3d.vercel.app | [Project settings](https://vercel.com/aivances-projects-faed689c/aiva3d) |
+| **Crooijmans** | `crooijmans` | https://crooijmans.vercel.app | [Project settings](https://vercel.com/aivances-projects-faed689c/crooijmans) |
+
+Health endpoints: `/api/health` op beide domeinen.
+
+### Verplicht: Root Directory (GitHub auto-deploy)
+
+Zonder dit faalt elke push op `main` (repo-root werd als Python gezien).
+
+| Project | Root Directory | Framework |
+|---------|----------------|-----------|
+| `aiva3d` | `web/customer` | Next.js |
+| `crooijmans` | `web/crooijmans` | Next.js |
+
+Vercel → **Settings → General → Root Directory** → Save → **Redeploy**.
+
+CLI-deploy vanuit de submap (`cd web/customer` → `vercel --prod`) werkt ook als de root directory nog verkeerd staat; **GitHub-integratie** niet.
+
+### Deployment Protection
+
+Als reviewers een Vercel-login zien: **Settings → Deployment Protection** uitzetten voor Production, of een share-link / bypass gebruiken.
+
 ## Review-linkjes (klant / Crooijmans) — gratis op Vercel Hobby
 
 Doel: **twee publieke URL’s** delen zodat mensen kunnen klikken en feedback geven. Alleen de **Next.js UI** staat op Vercel (gratis tier); dat kost je niets aan GPU of Python-hosting.
