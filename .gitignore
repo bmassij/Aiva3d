@@ -34,6 +34,12 @@ projects/work/handle_test/exports/*
 # Photo reconstruction verification bundles (STEP/STL/3MF)
 exports/verification/
 
+# Node (customer web on Vercel)
+node_modules/
+web/customer/.next/
+web/customer/out/
+.vercel
+
 # IDE
 .idea/
 *.swp
