@@ -62,23 +62,27 @@ function pointInPoly(x: number, y: number, poly: Vec2[]): boolean {
 
 function rdp(points: Vec2[], epsilon: number): Vec2[] {
   if (points.length < 3) return points;
-  const first = points[0];
-  const last = points[points.length - 1];
-  let maxD = 0;
-  let idx = 0;
-  for (let i = 1; i < points.length - 1; i++) {
-    const d = perpDist(points[i], first, last);
-    if (d > maxD) {
-      maxD = d;
-      idx = i;
+  const keep = new Uint8Array(points.length);
+  keep[0] = 1;
+  keep[points.length - 1] = 1;
+  const stack: Array<[number, number]> = [[0, points.length - 1]];
+  while (stack.length) {
+    const [start, end] = stack.pop()!;
+    let maxD = 0;
+    let idx = start;
+    for (let i = start + 1; i < end; i++) {
+      const d = perpDist(points[i], points[start], points[end]);
+      if (d > maxD) {
+        maxD = d;
+        idx = i;
+      }
+    }
+    if (maxD > epsilon) {
+      keep[idx] = 1;
+      stack.push([start, idx], [idx, end]);
     }
   }
-  if (maxD > epsilon) {
-    const left = rdp(points.slice(0, idx + 1), epsilon);
-    const right = rdp(points.slice(idx), epsilon);
-    return [...left.slice(0, -1), ...right];
-  }
-  return [first, last];
+  return points.filter((_, i) => keep[i]);
 }
 
 function perpDist(p: Vec2, a: Vec2, b: Vec2): number {
@@ -175,7 +179,7 @@ function extractLoops(cells: Uint8Array, width: number, height: number): Vec2[][
         guard += 1;
       } while ((cx !== start[0] || cy !== start[1]) && guard < width * height);
 
-      if (path.length >= 8) loops.push(path);
+      if (path.length >= 4) loops.push(path);
     }
   }
   return loops;
@@ -405,10 +409,94 @@ export function buildPrintModel(
 
   extrudeLoops(base, [roundedRect(plateW, plateH, CORNER_R)], [[circle(holeCx, holeCy, holeR)]], 0, baseMm);
 
-  if (grouped.outers.length === 0) {
+  if (grouped.outers.length > 0) {
+    try {
+      extrudeLoops(logo, grouped.outers, grouped.holes, baseMm, baseMm + reliefMm);
+    } catch {
+      logo.vertices = [];
+      logo.triangles = [];
+    }
+  }
+  if (logo.triangles.length === 0) {
+    voxelRelief(logo, bitmap.cells, bitmap.width, bitmap.height, ox, oy, cellW, cellH, holeCx, holeCy, holeR + 0.8, baseMm, baseMm + reliefMm);
+  }
+  if (logo.triangles.length === 0) {
     throw new Error("Logo-contour kon niet worden getrokken. Gebruik een scherper logo.");
   }
-  extrudeLoops(logo, grouped.outers, grouped.holes, baseMm, baseMm + reliefMm);
 
   return { widthMm: plateW, heightMm: plateH, objects: [base, logo], logoCells };
+}
+
+function addBox(
+  mesh: MeshObject,
+  x0: number,
+  y0: number,
+  z0: number,
+  x1: number,
+  y1: number,
+  z1: number,
+) {
+  const v = [
+    addVertex(mesh, [x0, y0, z0]),
+    addVertex(mesh, [x1, y0, z0]),
+    addVertex(mesh, [x1, y1, z0]),
+    addVertex(mesh, [x0, y1, z0]),
+    addVertex(mesh, [x0, y0, z1]),
+    addVertex(mesh, [x1, y0, z1]),
+    addVertex(mesh, [x1, y1, z1]),
+    addVertex(mesh, [x0, y1, z1]),
+  ];
+  mesh.triangles.push(
+    [v[0], v[2], v[1]],
+    [v[0], v[3], v[2]],
+    [v[4], v[5], v[6]],
+    [v[4], v[6], v[7]],
+    [v[0], v[1], v[5]],
+    [v[0], v[5], v[4]],
+    [v[1], v[2], v[6]],
+    [v[1], v[6], v[5]],
+    [v[2], v[3], v[7]],
+    [v[2], v[7], v[6]],
+    [v[3], v[0], v[4]],
+    [v[3], v[4], v[7]],
+  );
+}
+
+function voxelRelief(
+  mesh: MeshObject,
+  cells: Uint8Array,
+  width: number,
+  height: number,
+  ox: number,
+  oy: number,
+  cellW: number,
+  cellH: number,
+  holeCx: number,
+  holeCy: number,
+  holeClear: number,
+  z0: number,
+  z1: number,
+) {
+  const holeClear2 = holeClear * holeClear;
+  for (let y = 0; y < height; y++) {
+    let x = 0;
+    while (x < width) {
+      if (!cells[y * width + x]) {
+        x += 1;
+        continue;
+      }
+      let x2 = x + 1;
+      while (x2 < width && cells[y * width + x2]) x2 += 1;
+      const px0 = ox + x * cellW;
+      const px1 = ox + x2 * cellW;
+      const py0 = oy + (height - y - 1) * cellH;
+      const py1 = oy + (height - y) * cellH;
+      const mx = (px0 + px1) / 2;
+      const my = (py0 + py1) / 2;
+      if ((mx - holeCx) * (mx - holeCx) + (my - holeCy) * (my - holeCy) >= holeClear2) {
+        addBox(mesh, px0, py0, z0, px1, py1, z1);
+      }
+      x = x2;
+    }
+  }
 }

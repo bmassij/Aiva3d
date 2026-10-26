@@ -10,6 +10,42 @@ function hexToInt(hex: string): number {
   return Number.parseInt(hex.replace("#", ""), 16);
 }
 
+function drawFallback(host: HTMLDivElement, model: PrintModel) {
+  const canvas = document.createElement("canvas");
+  const width = host.clientWidth || 640;
+  const height = host.clientHeight || 420;
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  ctx.fillStyle = "#0a0e14";
+  ctx.fillRect(0, 0, width, height);
+  const project = (x: number, y: number, z: number): [number, number] => {
+    const X = (x - model.widthMm / 2) * 8 + z * 2.8;
+    const Y = (y - 1) * 8 + z * 1.6;
+    return [width / 2 + X, height * 0.72 - Y];
+  };
+  for (const obj of model.objects) {
+    ctx.fillStyle = obj.color;
+    for (const [ia, ib, ic] of obj.triangles) {
+      const a = obj.vertices[ia];
+      const b = obj.vertices[ib];
+      const c = obj.vertices[ic];
+      if (!a || !b || !c) continue;
+      const pa = project(a[0], a[2], a[1]);
+      const pb = project(b[0], b[2], b[1]);
+      const pc = project(c[0], c[2], c[1]);
+      ctx.beginPath();
+      ctx.moveTo(pa[0], pa[1]);
+      ctx.lineTo(pb[0], pb[1]);
+      ctx.lineTo(pc[0], pc[1]);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+  host.replaceChildren(canvas);
+}
+
 export function ModelViewer({ model }: { model: PrintModel }) {
   const hostRef = useRef<HTMLDivElement>(null);
 
@@ -114,6 +150,9 @@ export function ModelViewer({ model }: { model: PrintModel }) {
         renderer.domElement.remove();
       };
       if (cancelled) cleanup();
+    }).catch(() => {
+      if (cancelled || !host) return;
+      drawFallback(host, model);
     });
 
     return () => {

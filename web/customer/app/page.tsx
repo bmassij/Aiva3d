@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { bitmapToPreviewUrl, fileToImageData, imageDataToBitmap } from "@/lib/image-to-bitmap";
-import { buildPrintModel } from "@/lib/bitmap-to-mesh";
+import { buildPrintModel, type PrintModel } from "@/lib/bitmap-to-mesh";
 import { ModelViewer } from "@/components/ModelViewer";
 import { downloadBytes } from "@/lib/download";
 import { write3mf } from "@/lib/write-3mf";
@@ -22,6 +22,8 @@ export default function Home() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [previewModel, setPreviewModel] = useState<PrintModel | null>(null);
+  const [previewing, setPreviewing] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -74,13 +76,34 @@ export default function Home() {
     return bitmapToPreviewUrl(bitmap, logoColor, baseColor);
   }, [bitmap, logoColor, baseColor]);
 
-  const previewModel = useMemo(() => {
-    if (!bitmap) return null;
-    try {
-      return buildPrintModel(bitmap, { sizeMm, baseColor, logoColor });
-    } catch {
-      return null;
+  useEffect(() => {
+    if (!bitmap) {
+      setPreviewModel(null);
+      setPreviewing(false);
+      return;
     }
+    let cancelled = false;
+    setPreviewing(true);
+    const timer = window.setTimeout(() => {
+      try {
+        const model = buildPrintModel(bitmap, { sizeMm, baseColor, logoColor });
+        if (!cancelled) {
+          setPreviewModel(model);
+          setError(null);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setPreviewModel(null);
+          setError(err instanceof Error ? err.message : "3D-model kon niet worden gebouwd.");
+        }
+      } finally {
+        if (!cancelled) setPreviewing(false);
+      }
+    }, 0);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, [bitmap, sizeMm, baseColor, logoColor]);
 
   const generate = useCallback(
@@ -147,7 +170,11 @@ export default function Home() {
         {previewModel ? (
           <ModelViewer model={previewModel} />
         ) : (
-          <div className="viewer viewer-empty">Upload een logo om het 3D-model te zien.</div>
+          <div className="viewer viewer-empty">
+            {previewing
+              ? "3D-model wordt opgebouwd…"
+              : "Upload een logo om het 3D-model te zien."}
+          </div>
         )}
         <p className="hint">Sleep om te draaien, scroll om te zoomen. Dit is het bestand dat je downloadt.</p>
       </div>
