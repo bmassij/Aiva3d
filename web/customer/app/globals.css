@@ -53,8 +53,37 @@ label {
 }
 
 input[type="file"],
-input[type="color"] {
+input[type="color"],
+input[type="range"] {
   margin-bottom: 1rem;
+  width: 100%;
+  max-width: 320px;
+}
+
+.hint {
+  margin: -0.5rem 0 1rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text);
+  margin: 0.75rem 0 1rem;
+}
+
+.check input {
+  width: auto;
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0.25rem 0 1rem;
 }
 
 .preview {
@@ -75,6 +104,12 @@ input[type="color"] {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+}
+
+.preview-light {
+  background: #f4f1ea;
+  border-color: #d9d3c6;
+  color: #3d4f4d;
 }
 
 .row {

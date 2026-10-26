@@ -1,118 +1,191 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { bitmapToPreviewUrl, fileToImageData, imageDataToBitmap } from "@/lib/image-to-bitmap";
+import { buildPrintModel } from "@/lib/bitmap-to-mesh";
+import { downloadBytes } from "@/lib/download";
+import { write3mf } from "@/lib/write-3mf";
+import { writeBinaryStl } from "@/lib/write-stl";
 
-const CAD_API = process.env.NEXT_PUBLIC_CAD_API_URL ?? "";
+const DEMO_LOGO = "/demo-logo.svg";
 
 export default function Home() {
+  const [file, setFile] = useState<File | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const [hardColor, setHardColor] = useState("#4a90d9");
-  const [softColor, setSoftColor] = useState("#7ed957");
-  const [health, setHealth] = useState<string>("checking…");
+  const [imageData, setImageData] = useState<ImageData | null>(null);
+  const [invert, setInvert] = useState(false);
+  const [threshold, setThreshold] = useState<number | null>(null);
+  const [sizeMm, setSizeMm] = useState(40);
+  const [baseColor, setBaseColor] = useState("#f3f1eb");
+  const [logoColor, setLogoColor] = useState("#0e3d3a");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/health")
-      .then((r) => r.json())
-      .then((d) => setHealth(d.ok ? `OK — ${d.service} ${d.version}` : "degraded"))
-      .catch(() => setHealth("offline"));
-  }, []);
+    return () => {
+      if (logoUrl?.startsWith("blob:")) URL.revokeObjectURL(logoUrl);
+    };
+  }, [logoUrl]);
 
-  const onLogo = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    setLogoUrl((prev) => {
-      if (prev) URL.revokeObjectURL(prev);
-      return url;
-    });
-  }, []);
-
-  const onExport = () => {
-    if (CAD_API) {
-      window.open(CAD_API, "_blank", "noopener,noreferrer");
-      return;
+  const loadSource = useCallback(async (source: File | string) => {
+    setError(null);
+    setStatus(null);
+    setThreshold(null);
+    const data = await fileToImageData(source);
+    setImageData(data);
+    if (typeof source !== "string") {
+      const url = URL.createObjectURL(source);
+      setLogoUrl((prev) => {
+        if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
+        return url;
+      });
+      setFile(source);
+    } else {
+      setFile(null);
+      setLogoUrl(source);
     }
-    alert(
-      "3MF-generatie draait op de CAD-server (Streamlit/API). Zet NEXT_PUBLIC_CAD_API_URL in Vercel naar je backend wanneer die live staat.",
-    );
-  };
+  }, []);
+
+  const onLogo = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const next = e.target.files?.[0];
+      if (!next) return;
+      try {
+        await loadSource(next);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Upload mislukt.");
+      }
+    },
+    [loadSource],
+  );
+
+  const bitmap = useMemo(() => {
+    if (!imageData) return null;
+    return imageDataToBitmap(imageData, {
+      invert,
+      threshold: threshold ?? undefined,
+    });
+  }, [imageData, invert, threshold]);
+
+  const maskUrl = useMemo(() => {
+    if (!bitmap) return null;
+    return bitmapToPreviewUrl(bitmap, logoColor, baseColor);
+  }, [bitmap, logoColor, baseColor]);
+
+  const generate = useCallback(
+    async (format: "3mf" | "stl") => {
+      if (!bitmap) {
+        setError("Upload eerst het logo van het bedrijf of de persoon.");
+        return;
+      }
+      setBusy(true);
+      setError(null);
+      setStatus(null);
+      try {
+        const model = buildPrintModel(bitmap, {
+          sizeMm,
+          baseColor,
+          logoColor,
+        });
+        const stamp = new Date().toISOString().slice(0, 10);
+        if (format === "3mf") {
+          downloadBytes(`logo-hanger-${stamp}.3mf`, write3mf(model), "model/3mf");
+        } else {
+          downloadBytes(`logo-hanger-${stamp}.stl`, writeBinaryStl(model), "model/stl");
+        }
+        setStatus(
+          `Printbestand klaar: ${model.widthMm}×${model.heightMm} mm, logo in reliëf, gat voor de ring. Open in Bambu, Orca of Prusa.`,
+        );
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Genereren mislukt.");
+      } finally {
+        setBusy(false);
+      }
+    },
+    [bitmap, sizeMm, baseColor, logoColor],
+  );
 
   return (
     <main>
-      <h1>Aiva3D · Klantportaal</h1>
+      <h1>Print uw logo</h1>
       <p className="lead">
-        <strong>PNG → 3MF</strong> (roadmap): upload logo/afbeelding, kies kleuren — preview hier; echte geometrie en
-        3MF-export via de Python CAD-backend (CadQuery draait niet op Vercel).
+        Voor bedrijven en personen: upload het logo, kies de kleuren, en download een
+        printbare hanger. Geen handvat, geen CAD-programma — het bestand is klaar voor de
+        3D-printer.
       </p>
 
-      <div className="card status warn" style={{ marginBottom: "1rem" }}>
-        <strong>Review-build voor klant</strong> — laat weten wat je van de flow, teksten en preview vindt. 3MF-export
-        volgt zodra de CAD-API online staat.
+      <div className="card">
+        <label htmlFor="logo">Logo (PNG, JPG, SVG of foto van het logo)</label>
+        <input id="logo" type="file" accept="image/*" onChange={onLogo} />
+        <button type="button" className="secondary" onClick={() => void loadSource(DEMO_LOGO)}>
+          Voorbeeldlogo laden
+        </button>
+        <div className="row" style={{ marginTop: "1rem" }}>
+          <div className="preview preview-light">
+            {logoUrl ? <img src={logoUrl} alt="Geüpload logo" /> : <span>Nog geen logo</span>}
+          </div>
+          <div className="preview">
+            {maskUrl ? <img src={maskUrl} alt="Zo wordt het logo geprint" /> : <span>Printvorm</span>}
+          </div>
+        </div>
+        <p className="hint">Links het aangeleverde logo, rechts hoe het reliëf op de hanger komt.</p>
       </div>
 
       <div className="card">
-        <label htmlFor="logo">Logo (PNG/SVG/JPG)</label>
-        <input id="logo" type="file" accept="image/*" onChange={onLogo} />
-        <button
-          type="button"
-          className="secondary"
-          onClick={() => setLogoUrl("/demo-logo.jpg")}
-          style={{ marginBottom: "0.75rem" }}
-        >
-          Demo logo laden
-        </button>
-        <div className="preview" style={{ borderColor: softColor }}>
-          {logoUrl ? (
-            <img src={logoUrl} alt="Logo preview" />
-          ) : (
-            <span style={{ color: "#6b7d94" }}>Geen logo</span>
-          )}
-        </div>
+        <label htmlFor="size">Maat (mm, tot 40 × 40)</label>
+        <input
+          id="size"
+          type="range"
+          min={20}
+          max={40}
+          value={sizeMm}
+          onChange={(e) => setSizeMm(Number(e.target.value))}
+        />
+        <p className="hint">{sizeMm} × {sizeMm} mm · plaat 2 mm · logo 1,2 mm hoog · ringgat</p>
+
+        <label className="check">
+          <input type="checkbox" checked={invert} onChange={(e) => setInvert(e.target.checked)} />
+          Logo omdraaien (licht logo op donkere achtergrond)
+        </label>
+
+        <label htmlFor="threshold">Hoeveel van de foto wordt logo</label>
+        <input
+          id="threshold"
+          type="range"
+          min={20}
+          max={230}
+          value={threshold ?? bitmap?.threshold ?? 128}
+          onChange={(e) => setThreshold(Number(e.target.value))}
+        />
       </div>
 
       <div className="card row">
         <div>
-          <label htmlFor="hard">Hard core kleur (preview)</label>
-          <input
-            id="hard"
-            type="color"
-            value={hardColor}
-            onChange={(e) => setHardColor(e.target.value)}
-          />
+          <label htmlFor="base">Kleur van de plaat</label>
+          <input id="base" type="color" value={baseColor} onChange={(e) => setBaseColor(e.target.value)} />
         </div>
         <div>
-          <label htmlFor="soft">Soft grip kleur (preview)</label>
-          <input
-            id="soft"
-            type="color"
-            value={softColor}
-            onChange={(e) => setSoftColor(e.target.value)}
-          />
+          <label htmlFor="logoColor">Kleur van het logo</label>
+          <input id="logoColor" type="color" value={logoColor} onChange={(e) => setLogoColor(e.target.value)} />
         </div>
       </div>
 
-      <div
-        className="card"
-        style={{
-          background: `linear-gradient(135deg, ${hardColor}33 0%, ${softColor}44 100%)`,
-        }}
-      >
-        <p style={{ margin: 0 }}>
-          <strong>Grip preview tint</strong> — echte geometrie komt uit Aiva3D CAD (110 mm × 30 mm productie).
-        </p>
+      <div className="actions">
+        <button type="button" className="primary" disabled={!bitmap || busy} onClick={() => void generate("3mf")}>
+          {busy ? "Bezig…" : "Download 3MF"}
+        </button>
+        <button type="button" className="secondary" disabled={!bitmap || busy} onClick={() => void generate("stl")}>
+          Download STL
+        </button>
       </div>
 
-      <button type="button" className="primary" onClick={onExport}>
-        Open CAD / 3MF export
-      </button>
-
-      <div className={`status ${health.startsWith("OK") ? "ok" : "warn"}`}>
-        Vercel deploy: {health}
-        {CAD_API ? ` · API: ${CAD_API}` : " · NEXT_PUBLIC_CAD_API_URL niet gezet"}
-      </div>
+      {error ? <div className="status warn">{error}</div> : null}
+      {status ? <div className="status ok">{status}</div> : null}
 
       <footer>
-        Repo: GitHub bmassij/Aiva3d · Lokale CAD: Streamlit op poort 8501/8502
+        Het 3D-model wordt in de browser gemaakt van het logo. Geschikt voor NFC-sleutelhangers en
+        relatiegeschenken tot 40 × 40 mm.
       </footer>
     </main>
   );

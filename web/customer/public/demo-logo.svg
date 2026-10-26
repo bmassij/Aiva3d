@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640" role="img" aria-label="Voorbeeld bedrijfslogo">
+  <rect width="640" height="640" fill="#f4f1ea"/>
+  <circle cx="320" cy="268" r="148" fill="#0e3d3a"/>
+  <circle cx="320" cy="268" r="92" fill="#f4f1ea"/>
+  <rect x="276" y="268" width="88" height="168" rx="16" fill="#0e3d3a"/>
+  <text x="320" y="500" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="54" font-weight="700" fill="#0e3d3a">NOORD &amp; CO</text>
+  <text x="320" y="548" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" letter-spacing="4" fill="#0e3d3a">VOORBEELDLOGO</text>
+</svg>
