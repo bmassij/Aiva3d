@@ -6,7 +6,7 @@ export type LogoBitmap = {
   threshold: number;
 };
 
-const MAX_GRID = 96;
+const MAX_GRID = 180;
 
 function otsuThreshold(hist: Uint32Array, total: number): number {
   let sum = 0;
@@ -37,7 +37,7 @@ export async function fileToImageData(source: File | string): Promise<ImageData>
   try {
     const img = await loadImage(url);
     const side = Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height);
-    const scale = Math.min(1, 512 / side);
+    const scale = Math.min(1, 900 / side);
     const width = Math.max(1, Math.round((img.naturalWidth || img.width) * scale));
     const height = Math.max(1, Math.round((img.naturalHeight || img.height) * scale));
     const canvas = document.createElement("canvas");
