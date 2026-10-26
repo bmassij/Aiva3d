@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { bitmapToPreviewUrl, fileToImageData, imageDataToBitmap } from "@/lib/image-to-bitmap";
 import { buildPrintModel } from "@/lib/bitmap-to-mesh";
+import { ModelViewer } from "@/components/ModelViewer";
 import { downloadBytes } from "@/lib/download";
 import { write3mf } from "@/lib/write-3mf";
 import { writeBinaryStl } from "@/lib/write-stl";
@@ -73,6 +74,15 @@ export default function Home() {
     return bitmapToPreviewUrl(bitmap, logoColor, baseColor);
   }, [bitmap, logoColor, baseColor]);
 
+  const previewModel = useMemo(() => {
+    if (!bitmap) return null;
+    try {
+      return buildPrintModel(bitmap, { sizeMm, baseColor, logoColor });
+    } catch {
+      return null;
+    }
+  }, [bitmap, sizeMm, baseColor, logoColor]);
+
   const generate = useCallback(
     async (format: "3mf" | "stl") => {
       if (!bitmap) {
@@ -130,6 +140,16 @@ export default function Home() {
           </div>
         </div>
         <p className="hint">Links het aangeleverde logo, rechts hoe het reliëf op de hanger komt.</p>
+      </div>
+
+      <div className="card">
+        <label>3D-model</label>
+        {previewModel ? (
+          <ModelViewer model={previewModel} />
+        ) : (
+          <div className="viewer viewer-empty">Upload een logo om het 3D-model te zien.</div>
+        )}
+        <p className="hint">Sleep om te draaien, scroll om te zoomen. Dit is het bestand dat je downloadt.</p>
       </div>
 
       <div className="card">
